@@ -64,7 +64,7 @@ game-leaderboard-api/
 
 ```bash
 # 1. Clone & cd vào project
-git clone <your-repo-url>
+git clone https://github.com/bchhngsaygez/game-leaderboard-api.git
 cd game-leaderboard-api
 
 # 2. Cài dependencies
