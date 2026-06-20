@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint check (node -c)
+        run: |
+          node -c src/app.js
+          node -c src/config/redis.js
+          node -c src/config/logger.js
+          node -c src/controllers/rankController.js
+          node -c src/middlewares/errorHandler.js
+          node -c src/middlewares/validate.js
+          node -c src/middlewares/rateLimiter.js
+          node -c src/routes/rankRoutes.js
+          node -c src/routes/healthRoutes.js
+          node -c src/validators/rankValidator.js
+
+      - name: Run tests
+        run: npm test
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          LOG_LEVEL: silent
